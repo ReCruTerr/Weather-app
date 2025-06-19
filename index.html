@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прогноз погоды</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF); /* Голубой градиент, имитирующий небо */
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Добавляем облака и солнца как элементы */
+        .cloud, .sun {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .cloud {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sun {
+            background: #FFD700; /* Желтый цвет солнца */
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        }
+
+        /* Расположение элементов */
+        .cloud:nth-child(1) { width: 120px; height: 60px; top: 10%; left: 10%; }
+        .cloud:nth-child(2) { width: 80px; height: 40px; top: 20%; left: 30%; }
+        .cloud:nth-child(3) { width: 100px; height: 50px; top: 15%; left: 50%; }
+        .sun:nth-child(4) { width: 80px; height: 80px; top: 30%; left: 20%; }
+        .sun:nth-child(5) { width: 60px; height: 60px; top: 40%; left: 40%; }
+        .sun:nth-child(6) { width: 70px; height: 70px; top: 25%; left: 60%; }
+
+        .search-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            z-index: 10;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        #weather-result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+    <div class="search-container">
+        <h2>Прогноз погоды</h2>
+        <input type="text" id="city-input" placeholder="Введите название города" />
+        <button onclick="getWeather()">Поиск</button>
+        <div id="weather-result"></div>
+    </div>
+
+    <script>
+        async function getWeather() {
+            const city = document.getElementById('city-input').value.trim();
+            if (!city) {
+                document.getElementById('weather-result').innerHTML = '<p style="color: red;">Введите название города!</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8000/weather?city=${encodeURIComponent(city)}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('weather-result').innerHTML = `
+                        <h3>${data.city}</h3>
+                        <p>Температура: ${data.temperature}°C</p>
+                        <p>Влажность: ${data.humidity}%</p>
+                        <p>Скорость ветра: ${data.wind_speed} м/с</p>
+                        <p>Описание: ${data.description}</p>
+                    `;
+                } else {
+                    document.getElementById('weather-result').innerHTML = `<p style="color: red;">${data.detail || 'Ошибка при получении данных'}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('weather-result').innerHTML = '<p style="color: red;">Ошибка соединения с сервером</p>';
+            }
+        }
+    </script>
+</body>
+</html>
